@@ -639,6 +639,9 @@ class AstVisitor(SolidityVisitor):
         isDeclaredConst = False
         if ctx.ConstantKeyword(0):
             isDeclaredConst = True
+        isDeclaredImmutable = False
+        if ctx.ImmutableKeyword(0):
+            isDeclaredImmutable = True
 
         decl = self._createNode(
             ctx=ctx,
@@ -649,6 +652,7 @@ class AstVisitor(SolidityVisitor):
             visibility=visibility,
             isStateVar=True,
             isDeclaredConst=isDeclaredConst,
+            isDeclaredImmutable=isDeclaredImmutable,
             isIndexed=False)
 
         return Node(ctx=ctx,
