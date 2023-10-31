@@ -1020,7 +1020,10 @@ class AstVisitor(SolidityVisitor):
                     name=ctx.getText())
 
     def visitReturnStatement(self, ctx):
-        return self.visit(ctx.expression())
+        return Node(ctx=ctx,
+                    type='ReturnStatement',
+                    expression=self.visit(ctx.expression()),
+                    )
 
     def visitTerminal(self, ctx):
         return ctx.getText()
