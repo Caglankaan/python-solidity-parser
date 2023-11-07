@@ -138,10 +138,17 @@ class AstVisitor(SolidityVisitor):
                     parameterList=self.visit(ctx.parameterList()))
 
     def visitFileLevelConstant(self, ctx):
+        exprList = ctx.expression()
+        if exprList is not None:
+            args = self.visit(exprList.expression())
+        else:
+            args = []
+
         return Node(ctx=ctx,
                     type="FileLevelConstant",
                     name=self.visit(ctx.identifier()),
                     typeName=self.visit(ctx.typeName()),
+                    expressions=self.visit(ctx.expression()),
                     ConstantKeyword=self.visit(ctx.ConstantKeyword()))
 
 
@@ -203,6 +210,10 @@ class AstVisitor(SolidityVisitor):
             stateMutability = ctx.modifierList().stateMutability(0).getText()
         else:
             stateMutability = None
+        if ctx.modifierList().overrideSpecifier(0):
+            override = True
+        else:
+            override = False
 
         return Node(ctx=ctx,
                     type="FunctionDefinition",
@@ -215,7 +226,8 @@ class AstVisitor(SolidityVisitor):
                     isConstructor=isConstructor,
                     isFallback=isFallback,
                     isReceive=isReceive,
-                    stateMutability=stateMutability)
+                    stateMutability=stateMutability,
+                    override=override)
 
     def visitReturnParameters(self, ctx: SolidityParser.ReturnParametersContext):
         return self.visit(ctx.parameterList())
