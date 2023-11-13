@@ -10,7 +10,8 @@ from antlr4 import *
 from solidity_parser.solidity_antlr4.SolidityLexer import SolidityLexer
 from solidity_parser.solidity_antlr4.SolidityParser import SolidityParser
 from solidity_parser.solidity_antlr4.SolidityVisitor import SolidityVisitor
-
+import traceback
+from loguru import logger
 
 class Node(dict):
     """
@@ -758,6 +759,8 @@ class AstVisitor(SolidityVisitor):
         result = []
         for decl in self._mapCommasToNulls(ctx.children):
             if decl == None:
+                if result is not None:
+                    return result
                 return None
 
             result.append(self._createNode(ctx=ctx,
@@ -861,9 +864,16 @@ class AstVisitor(SolidityVisitor):
         return self.visit(ctx.getChild(0))
 
     def visitAssemblyMember(self, ctx):
+        try:
+            name = ctx.identifier().getText()
+        except Exception as e:
+            name = None
+            logger.error("Exception occured on visitAssemblyMember. E "+ str(e))
+            logger.warning("what is ctx.identifier(): "+ str(ctx.identifier()))
+            traceback.print_exc()
         return Node(ctx=ctx,
                     type='AssemblyMember',
-                    name=ctx.identifier().getText())
+                    name=name)
 
     def visitAssemblyCall(self, ctx):
         functionName = ctx.getChild(0).getText()
@@ -925,10 +935,16 @@ class AstVisitor(SolidityVisitor):
     def visitAssemblyLocalDefinition(self, ctx):
         names = ctx.assemblyIdentifierOrList()
 
-        if names.identifier():
-            names = [self.visit(names.identifier())]
-        else:
-            names = self.visit(names.assemblyIdentifierList().identifier())
+        try:
+            if names.identifier():
+                names = [self.visit(names.identifier())]
+            else:
+                names = self.visit(names.assemblyIdentifierList().identifier())
+        except Exception as e:
+            names = []
+            logger.error("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
+            traceback.print_exc()
+
 
         return Node(ctx=ctx,
                     type='AssemblyLocalDefinition',
@@ -937,22 +953,35 @@ class AstVisitor(SolidityVisitor):
 
     def visitAssemblyFunctionDefinition(self, ctx):
         args = ctx.assemblyIdentifierList().identifier()
-        returnArgs = ctx.assemblyFunctionReturns().assemblyIdentifierList().identifier()
+        try:
+            returnArgs = ctx.assemblyFunctionReturns().assemblyIdentifierList().identifier()
+            returnArguments = self.visit(returnArgs)
+        except Exception as e:
+            names = []
+            logger.error("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
+            traceback.print_exc()
+            returnArguments = None
+
 
         return Node(ctx=ctx,
                     type='AssemblyFunctionDefinition',
                     name=ctx.identifier().getText(),
                     arguments=self.visit(args),
-                    returnArguments=self.visit(returnArgs),
+                    returnArguments=returnArguments,
                     body=self.visit(ctx.assemblyBlock()))
 
     def visitAssemblyAssignment(self, ctx):
         names = ctx.assemblyIdentifierOrList()
 
-        if names.identifier():
-            names = [self.visit(names.identifier())]
-        else:
-            names = self.visit(names.assemblyIdentifierList().identifier())
+        try:
+            if names.identifier():
+                names = [self.visit(names.identifier())]
+            else:
+                names = self.visit(names.assemblyIdentifierList().identifier())
+        except Exception as e:
+            names = []
+            logger.error("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
+            traceback.print_exc()
 
         return Node(ctx=ctx,
                     type='AssemblyAssignment',
