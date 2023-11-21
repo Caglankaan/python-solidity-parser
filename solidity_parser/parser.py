@@ -12,6 +12,7 @@ from solidity_parser.solidity_antlr4.SolidityParser import SolidityParser
 from solidity_parser.solidity_antlr4.SolidityVisitor import SolidityVisitor
 import traceback
 from loguru import logger
+import copy
 
 class Node(dict):
     """
@@ -32,6 +33,18 @@ class Node(dict):
 
     def __setattr__(self, name, value):
         self[name] = value
+
+    def __deepcopy__(self, memo):
+        # Create a new Node instance
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+
+        # Copy each attribute
+        for k, v in self.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+
+        return result
 
     @staticmethod
     def _get_loc(ctx):
