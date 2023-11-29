@@ -775,6 +775,7 @@ class AstVisitor(SolidityVisitor):
                 if result is not None:
                     return result
                 return None
+            # print("What is decl? "+ str(decl))
 
             result.append(self._createNode(ctx=ctx,
                                            type='VariableDeclaration',
@@ -782,7 +783,7 @@ class AstVisitor(SolidityVisitor):
                                            typeName=self.visit(decl.typeName()),
                                            isStateVar=False,
                                            isIndexed=False,
-                                           decl=decl))
+                                           decl=str(decl)))
 
         return result
 
