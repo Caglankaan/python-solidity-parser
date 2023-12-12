@@ -772,16 +772,22 @@ class AstVisitor(SolidityVisitor):
         result = []
         for decl in self._mapCommasToNulls(ctx.children):
             if decl == None:
+                continue # If its None, just continue. No need to return None...
                 if result is not None:
                     return result
                 return None
-            # print("What is decl? "+ str(decl))
+            storageLocation = None
+
+            if decl.storageLocation():
+                storageLocation = decl.storageLocation().getText()
+
 
             result.append(self._createNode(ctx=ctx,
                                            type='VariableDeclaration',
                                            name=decl.identifier().getText(),
                                            typeName=self.visit(decl.typeName()),
                                            isStateVar=False,
+                                           storageLocation=storageLocation,
                                            isIndexed=False,
                                            decl=str(decl)))
 
