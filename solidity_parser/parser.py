@@ -226,8 +226,11 @@ class AstVisitor(SolidityVisitor):
             stateMutability = None
         if ctx.modifierList().overrideSpecifier(0):
             override = True
+            override_str = ctx.modifierList().overrideSpecifier(0).getText()
         else:
             override = False
+            override_str = None
+        
 
         return Node(ctx=ctx,
                     type="FunctionDefinition",
@@ -241,7 +244,8 @@ class AstVisitor(SolidityVisitor):
                     isFallback=isFallback,
                     isReceive=isReceive,
                     stateMutability=stateMutability,
-                    override=override)
+                    override=override,
+                    override_str=override_str)
 
     def visitReturnParameters(self, ctx: SolidityParser.ReturnParametersContext):
         return self.visit(ctx.parameterList())
@@ -885,15 +889,22 @@ class AstVisitor(SolidityVisitor):
 
     def visitAssemblyMember(self, ctx):
         try:
-            name = ctx.identifier().getText()
+            identifier = ctx.identifier()
+            if isinstance(identifier, list):
+                list_names = []
+                for i in identifier:
+                    list_names.append(i.getText())
+                return Node(ctx=ctx,
+                            type='AssemblyMemberList',
+                            name=list_names)
+            else:
+                return Node(ctx=ctx,
+                            type='AssemblyMember',
+                            name=identifier.getText())
         except Exception as e:
-            name = None
-            logger.error("Exception occured on visitAssemblyMember. E "+ str(e))
-            logger.warning("what is ctx.identifier(): "+ str(ctx.identifier()))
             traceback.print_exc()
-        return Node(ctx=ctx,
-                    type='AssemblyMember',
-                    name=name)
+
+        return None
 
     def visitAssemblyCall(self, ctx):
         functionName = ctx.getChild(0).getText()
