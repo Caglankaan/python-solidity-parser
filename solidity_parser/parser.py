@@ -973,7 +973,7 @@ class AstVisitor(SolidityVisitor):
                 names = self.visit(names.assemblyIdentifierList().identifier())
         except Exception as e:
             names = []
-            logger.error("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
+            logger.warning("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
             traceback.print_exc()
 
 
@@ -989,7 +989,7 @@ class AstVisitor(SolidityVisitor):
             returnArguments = self.visit(returnArgs)
         except Exception as e:
             names = []
-            logger.error("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
+            logger.warning("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
             traceback.print_exc()
             returnArguments = None
 
@@ -1011,7 +1011,7 @@ class AstVisitor(SolidityVisitor):
                 names = self.visit(names.assemblyIdentifierList().identifier())
         except Exception as e:
             names = []
-            logger.error("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
+            logger.warning("Exception occured on visitAssemblyLocalDefinition. E "+ str(e))
             traceback.print_exc()
 
         return Node(ctx=ctx,
