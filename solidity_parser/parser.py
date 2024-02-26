@@ -776,6 +776,7 @@ class AstVisitor(SolidityVisitor):
         result = []
         for decl in self._mapCommasToNulls(ctx.children):
             if decl == None:
+                result.append(None) # Append also nones.
                 continue # If its None, just continue. No need to return None...
                 if result is not None:
                     return result
